@@ -465,6 +465,87 @@
       font-size: 9px;
       letter-spacing: 0.15em;
     }
+
+    /* ── LIGHTBOX ── */
+    #lightbox {
+      position: fixed;
+      inset: 0;
+      z-index: 8000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(8, 35, 38, 0.96);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    #lightbox.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    #lightbox img {
+      max-width: min(92vw, 480px);
+      max-height: 92vh;
+      object-fit: contain;
+      border-radius: 6px;
+      transform: scale(0.92);
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+    }
+
+    #lightbox.active img {
+      transform: scale(1);
+    }
+
+    #lightbox-close {
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: #fff;
+      font-size: 18px;
+      line-height: 1;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s ease;
+    }
+
+    #lightbox-close:hover {
+      background: rgba(255,255,255,0.22);
+    }
+
+    .flyer-wrap {
+      cursor: zoom-in;
+    }
+
+    /* ── APERITIVO STRIP ── */
+    .aperitivo-strip {
+      text-align: center;
+      padding: 20px 20px 4px;
+      font-family: var(--font-body);
+      font-size: 11px;
+      font-weight: 300;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.6);
+      line-height: 1.8;
+    }
+
+    .aperitivo-strip strong {
+      color: #ffffff;
+      font-weight: 500;
+      letter-spacing: 0.22em;
+    }
   </style>
 </head>
 <body>
@@ -482,6 +563,12 @@
     <span id="toggle-label">Lingua</span>
     <span class="current-lang" id="toggle-lang-code"></span>
   </button>
+
+  <!-- ══ LIGHTBOX ══ -->
+  <div id="lightbox" role="dialog" aria-modal="true" aria-label="Locandina ingrandita">
+    <button id="lightbox-close" onclick="closeLightbox()" aria-label="Chiudi">✕</button>
+    <img id="lightbox-img" src="" alt="" />
+  </div>
 
   <!-- ══ LANGUAGE PICKER ══ -->
   <div id="lang-overlay" role="dialog" aria-modal="true" aria-labelledby="lang-title">
@@ -537,7 +624,7 @@
 
       <!-- CARD 1 -->
       <article class="event-card">
-        <div class="flyer-wrap">
+        <div class="flyer-wrap" onclick="openLightbox('events/giovedi.jpg')">
           <!-- Sostituisci src con il path del tuo flyer, es: events/giovedi.jpg -->
           <img src="events/giovedi.jpg" alt="Trapical - Giovedì 16 Aprile" id="img-1" />
           <div class="flyer-placeholder" id="ph-1" style="display:none">
@@ -564,7 +651,7 @@
 
       <!-- CARD 2 -->
       <article class="event-card">
-        <div class="flyer-wrap">
+        <div class="flyer-wrap" onclick="openLightbox('events/venerdi.jpg')">
           <img src="events/venerdi.jpg" alt="Mi Casa - Venerdì 17 Aprile" id="img-2" />
           <div class="flyer-placeholder" id="ph-2" style="display:none">
             <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
@@ -590,7 +677,7 @@
 
       <!-- CARD 3 -->
       <article class="event-card">
-        <div class="flyer-wrap">
+        <div class="flyer-wrap" onclick="openLightbox('events/sabato.jpg')">
           <img src="events/sabato.jpg" alt="Secret & Fukksleep - Sabato 18 Aprile" id="img-3" />
           <div class="flyer-placeholder" id="ph-3" style="display:none">
             <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
@@ -616,7 +703,7 @@
 
       <!-- CARD 4 -->
       <article class="event-card">
-        <div class="flyer-wrap">
+        <div class="flyer-wrap" onclick="openLightbox('events/domenica.jpg')">
           <img src="events/domenica.jpg" alt="Bacon Air - Domenica" id="img-4" />
           <div class="flyer-placeholder" id="ph-4" style="display:none">
             <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
@@ -641,6 +728,12 @@
       </article>
 
     </div><!-- /events-grid -->
+    <!-- ══ APERITIVO STRIP ══ -->
+    <div class="aperitivo-strip">
+      <strong>Aperitivo fronte lago</strong><br/>
+      dal Mercoledì alla Domenica · dalle 18:00
+    </div>
+
   </main>
 
   <!-- ══ FOOTER ══ -->
@@ -771,6 +864,31 @@
         if (saved && T[saved]) { setLang(saved); }
       } catch(e) {}
     })();
+
+    // ══ LIGHTBOX ══
+    function openLightbox(src) {
+      var lb = document.getElementById('lightbox');
+      var img = document.getElementById('lightbox-img');
+      img.src = src;
+      lb.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeLightbox() {
+      var lb = document.getElementById('lightbox');
+      lb.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+
+    // Close on backdrop tap
+    document.getElementById('lightbox').addEventListener('click', function(e) {
+      if (e.target === this) closeLightbox();
+    });
+
+    // Close on Escape
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') closeLightbox();
+    });
   </script>
 
 </body>
